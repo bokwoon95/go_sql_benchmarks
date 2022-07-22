@@ -23,16 +23,17 @@ import (
 var embedFS embed.FS
 
 var (
+	sqliteDriver   = "sqlite3"
 	sqliteDSN      = "test.db"
-	postgresDSN    = flag.String("postgres", "", "postgres dsn")
-	mysqlDSN       = flag.String("mysql", "", "mysql dsn")
 	postgresDriver = "postgres"
-	compiledFetch  *sq.CompiledFetch[Film]
+	postgresDSN    = flag.String("postgres", "", "postgres dsn")
+	mysqlDriver    = "mysql"
+	mysqlDSN       = flag.String("mysql", "", "mysql dsn")
 )
 
 func init() {
 	log.SetFlags(log.Lshortfile | log.LstdFlags)
-	for _, dsn := range []string{sqliteDSN, *postgresDSN} {
+	for _, dsn := range []string{sqliteDSN, *postgresDSN, *mysqlDSN} {
 		if dsn == "" {
 			continue
 		}
@@ -57,22 +58,6 @@ func init() {
 			log.Fatal(err)
 		}
 	}
-
-	var err error
-	compiledFetch, err = sq.CompileFetch(sq.Queryf("SELECT {*} FROM film ORDER BY film_id"), func(row *sq.Row) (Film, error) {
-		film := Film{
-			FilmID:      row.Int("film_id"),
-			Title:       row.String("title"),
-			Description: row.String("description"),
-			ReleaseYear: row.Int("release_year"),
-			Rating:      row.String("rating"),
-			LastUpdate:  row.Time("last_update"),
-		}
-		return film, nil
-	})
-	if err != nil {
-		log.Fatal(err)
-	}
 }
 
 type Film struct {
@@ -85,7 +70,7 @@ type Film struct {
 }
 
 func Benchmark_sq_sqlite(b *testing.B) {
-	db, err := sql.Open("sqlite3", sqliteDSN)
+	db, err := sql.Open(sqliteDriver, sqliteDSN)
 	if err != nil {
 		b.Fatal(err)
 	}
@@ -110,24 +95,8 @@ func Benchmark_sq_sqlite(b *testing.B) {
 	}
 }
 
-func Benchmark_sq_compiled_sqlite(b *testing.B) {
-	db, err := sql.Open("sqlite3", sqliteDSN)
-	if err != nil {
-		b.Fatal(err)
-	}
-	defer db.Close()
-
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		_, err = compiledFetch.FetchAll(db, sq.Params{})
-		if err != nil {
-			b.Fatal(err)
-		}
-	}
-}
-
 func Benchmark_sqlx_sqlite(b *testing.B) {
-	db, err := sqlx.Open("sqlite3", sqliteDSN)
+	db, err := sqlx.Open(sqliteDriver, sqliteDSN)
 	if err != nil {
 		b.Fatal(err)
 	}
@@ -173,26 +142,6 @@ func Benchmark_sq_postgres(b *testing.B) {
 	}
 }
 
-func Benchmark_sq_compiled_postgres(b *testing.B) {
-	if *postgresDSN == "" {
-		b.SkipNow()
-	}
-
-	db, err := sql.Open(postgresDriver, *postgresDSN)
-	if err != nil {
-		b.Fatal(err)
-	}
-	defer db.Close()
-
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		_, err = compiledFetch.FetchAll(db, sq.Params{})
-		if err != nil {
-			b.Fatal(err)
-		}
-	}
-}
-
 func Benchmark_sqlx_postgres(b *testing.B) {
 	if *postgresDSN == "" {
 		b.SkipNow()
@@ -219,7 +168,7 @@ func Benchmark_sq_mysql(b *testing.B) {
 		b.SkipNow()
 	}
 
-	db, err := sql.Open("mysql", *mysqlDSN)
+	db, err := sql.Open(mysqlDriver, *mysqlDSN)
 	if err != nil {
 		b.Fatal(err)
 	}
@@ -244,32 +193,12 @@ func Benchmark_sq_mysql(b *testing.B) {
 	}
 }
 
-func Benchmark_sq_compiled_mysql(b *testing.B) {
-	if *mysqlDSN == "" {
-		b.SkipNow()
-	}
-
-	db, err := sql.Open("mysql", *mysqlDSN)
-	if err != nil {
-		b.Fatal(err)
-	}
-	defer db.Close()
-
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		_, err = compiledFetch.FetchAll(db, sq.Params{})
-		if err != nil {
-			b.Fatal(err)
-		}
-	}
-}
-
 func Benchmark_sqlx_mysql(b *testing.B) {
 	if *mysqlDSN == "" {
 		b.SkipNow()
 	}
 
-	db, err := sqlx.Open("mysql", *mysqlDSN)
+	db, err := sqlx.Open(mysqlDriver, *mysqlDSN)
 	if err != nil {
 		b.Fatal(err)
 	}
