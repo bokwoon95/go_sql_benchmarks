@@ -84,7 +84,7 @@ type Film struct {
 	LastUpdate  time.Time `db:"last_update"`
 }
 
-func BenchmarkSqSQLite(b *testing.B) {
+func Benchmark_sq_sqlite(b *testing.B) {
 	db, err := sql.Open("sqlite3", sqliteDSN)
 	if err != nil {
 		b.Fatal(err)
@@ -110,7 +110,7 @@ func BenchmarkSqSQLite(b *testing.B) {
 	}
 }
 
-func BenchmarkSqCompiledSQLite(b *testing.B) {
+func Benchmark_sq_compiled_sqlite(b *testing.B) {
 	db, err := sql.Open("sqlite3", sqliteDSN)
 	if err != nil {
 		b.Fatal(err)
@@ -126,7 +126,7 @@ func BenchmarkSqCompiledSQLite(b *testing.B) {
 	}
 }
 
-func BenchmarkSqlxSQLite(b *testing.B) {
+func Benchmark_sqlx_sqlite(b *testing.B) {
 	db, err := sqlx.Open("sqlite3", sqliteDSN)
 	if err != nil {
 		b.Fatal(err)
@@ -143,7 +143,7 @@ func BenchmarkSqlxSQLite(b *testing.B) {
 	}
 }
 
-func BenchmarkSqPostgres(b *testing.B) {
+func Benchmark_sq_postgres(b *testing.B) {
 	if *postgresDSN == "" {
 		b.SkipNow()
 	}
@@ -173,7 +173,7 @@ func BenchmarkSqPostgres(b *testing.B) {
 	}
 }
 
-func BenchmarkSqCompiledPostgres(b *testing.B) {
+func Benchmark_sq_compiled_postgres(b *testing.B) {
 	if *postgresDSN == "" {
 		b.SkipNow()
 	}
@@ -193,7 +193,7 @@ func BenchmarkSqCompiledPostgres(b *testing.B) {
 	}
 }
 
-func BenchmarkSqlxPostgres(b *testing.B) {
+func Benchmark_sqlx_postgres(b *testing.B) {
 	if *postgresDSN == "" {
 		b.SkipNow()
 	}
@@ -214,7 +214,7 @@ func BenchmarkSqlxPostgres(b *testing.B) {
 	}
 }
 
-func BenchmarkSqMySQL(b *testing.B) {
+func Benchmark_sq_mysql(b *testing.B) {
 	if *mysqlDSN == "" {
 		b.SkipNow()
 	}
@@ -244,7 +244,7 @@ func BenchmarkSqMySQL(b *testing.B) {
 	}
 }
 
-func BenchmarkSqCompiledMySQL(b *testing.B) {
+func Benchmark_sq_compiled_mysql(b *testing.B) {
 	if *mysqlDSN == "" {
 		b.SkipNow()
 	}
@@ -264,7 +264,7 @@ func BenchmarkSqCompiledMySQL(b *testing.B) {
 	}
 }
 
-func BenchmarkSqlxMySQL(b *testing.B) {
+func Benchmark_sqlx_mysql(b *testing.B) {
 	if *mysqlDSN == "" {
 		b.SkipNow()
 	}
